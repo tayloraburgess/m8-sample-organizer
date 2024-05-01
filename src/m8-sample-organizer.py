@@ -55,12 +55,16 @@ def strip_path_prefix(path, prefix):
         return path
 
 def shorten_path(path):
+    (root, ext,) = os.path.splitext(path) 
+
     # Clean up the punctuation
     for c in SPLIT_PUNCTUATION:
-        path = path.replace(c, " ")
+        root = root.replace(c, " ")
 
     for c in FILL_PUNCTUATION:
-        path = path.replace(c, "")
+        root = root.replace(c, "")
+
+    path = root + ext
 
     # Split the path into a list of parts (i.e., folders)
     parts = path.split(os.sep)
@@ -106,7 +110,7 @@ def clean_file(file, unique_words):
 
     words = [word.lower() for word in p.stem.split()]
 
-    file = JOIN_SEP.join(words[:-1]) + p.suffix
+    file = JOIN_SEP.join(words) + p.suffix
     
     return file
 
@@ -153,13 +157,20 @@ def main():
     for src_path in files:
         relative_path = strip_path_prefix(src_path, SRC_FOLDER)
         short_path = shorten_path(relative_path)
+
+        print("Input  {}".format(relative_path))
+        if len(short_path) < 120:
+            print("Output {}".format(short_path))
+        else:
+            while len(short_path) >= 120:
+                print("Output {} is longer than 120 characters. Edit?".format(short_path))
+                short_path = input(">")
+
         dest_path = os.path.join(DEST_FOLDER, short_path)
 
         if SKIP_EXISTING and os.path.exists(dest_path):
             continue
 
-        print("Input  {}".format(relative_path))
-        print("Output {}".format(short_path))
         print()
 
         convert_wav_to_16bit(FFMPEG_PATH, src_path, dest_path)
