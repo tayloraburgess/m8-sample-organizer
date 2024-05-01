@@ -3,6 +3,7 @@ import re
 import string
 import subprocess
 import yaml
+import pathlib
 
 
 with open("config.yml", "r") as f:
@@ -73,7 +74,7 @@ def shorten_path(path):
 
     pack = clean_folder(pack, unique_words)
     path = clean_path(path, unique_words)
-    file = clean_file(file, unique_words)
+    file = file_to_wav(clean_file(file, unique_words))
     
     # Join the parts back together
     parts = [pack, path, file]
@@ -86,7 +87,7 @@ def clean_folder(folder, unique_words):
 
     words = remove_dupe_words(words, unique_words)
     
-    words = [capitalize(word) for word in words]
+    words = [word.lower() for word in words]
 
     pack = JOIN_SEP.join(words)
 
@@ -101,19 +102,16 @@ def clean_path(path, unique_words):
     return JOIN_SEP.join(path)
 
 def clean_file(file, unique_words):
-    parts = file.split(".")
+    p = pathlib.Path(file)
 
-    extension = parts[-1]
+    words = [word.lower() for word in p.stem.split()]
 
-    filename = " ".join(parts)
-
-    words = filename.split()
-
-    words = [capitalize(word) for word in words]
-
-    file = JOIN_SEP.join(words[:-1]) + "." + extension
+    file = JOIN_SEP.join(words[:-1]) + p.suffix
     
     return file
+
+def file_to_wav(file):
+    return pathlib.Path(file).stem + ".wav"
 
 def remove_dupe_words(words, unique_words):
     # Remove duplicate words
@@ -136,11 +134,6 @@ def remove_dupe_words(words, unique_words):
     unique_words.update([word.lower() for word in flipped_plurals])
 
     return words
-
-def capitalize(word):
-    if word[0].islower():
-        word = word[0].upper() + word[1:]
-    return word
 
 def convert_wav_to_16bit(ffmpeg_path, input_path, output_path):
     # Create the directories in the output path if they do not exist
