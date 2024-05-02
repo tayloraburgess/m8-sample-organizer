@@ -15,10 +15,13 @@ DEST_FOLDER: "/Users/YOUR_USERNAME/M8 Samples"
 #DEST_FOLDER: C:\Users\YOUR_USERNAME\Documents\M8 Samples
 
 ### Set the path to FFMPEG
-FFMPEG_PATH: "\usr\local\bin\ffmpeg"
+FFMPEG_PATH: "/usr/local/bin/ffmpeg"
 
 # For Windows, comment out the above lines and uncomment these
 #FFMPEG_PATH: C:\ffmpeg\bin\ffmpeg.exe
+
+MAX_FILE_LENGTH: 38
+MAX_DIR_LENGTH: 37
 
 ###
 ### PATH CLEANUP CONFIG
