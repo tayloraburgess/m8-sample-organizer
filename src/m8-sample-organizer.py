@@ -20,7 +20,9 @@ FILL_PUNCTUATION = config["FILL_PUNCTUATION"]
 STRIKE_WORDS = [word.lower() for word in config["STRIKE_WORDS"]]
 JOIN_SEP = config["JOIN_SEP"]
 SKIP_EXISTING = config["SKIP_EXISTING"]
-
+MAX_FILE_LENGTH = config["MAX_FILE_LENGTH"]
+MAX_DIR_LENGTH = config["MAX_DIR_LENGTH"]
+MAX_OUTPUT_LENGTH = config["MAX_OUTPUT_LENGTH"]
 
 def get_files_by_type(folder, file_types=None):
     # Initialize an empty list to store the file paths
@@ -83,7 +85,6 @@ def shorten_path(path):
     # Join the parts back together
     parts = [pack, path, file]
     path = os.sep.join([part for part in parts if part])
-
     return path
 
 def clean_folder(folder, unique_words):
@@ -93,29 +94,25 @@ def clean_folder(folder, unique_words):
     
     words = [word.lower() for word in words]
 
-    pack = JOIN_SEP.join(words)
-
-    return pack
+    return JOIN_SEP.join(words)[:MAX_DIR_LENGTH]
     
 def clean_path(path, unique_words):
     for i, folder in enumerate(path):
         path[i] = clean_folder(folder, unique_words)
 
-    path = [folder for folder in path if folder]
+    path = [folder for folder in path if re.sub(r"\s+", "", folder)]
 
-    return JOIN_SEP.join(path)
+    return "/".join(path)
 
 def clean_file(file, unique_words):
     p = pathlib.Path(file)
 
     words = [word.lower() for word in p.stem.split()]
 
-    file = JOIN_SEP.join(words) + p.suffix
-    
-    return file
+    return JOIN_SEP.join(words) + p.suffix
 
 def file_to_wav(file):
-    return pathlib.Path(file).stem + ".wav"
+    return pathlib.Path(file).stem[:MAX_FILE_LENGTH - 4] + ".wav"
 
 def remove_dupe_words(words, unique_words):
     # Remove duplicate words
@@ -158,12 +155,12 @@ def main():
         relative_path = strip_path_prefix(src_path, SRC_FOLDER)
         short_path = shorten_path(relative_path)
 
-        print("Input  {}".format(relative_path))
-        if len(short_path) < 120:
-            print("Output {}".format(short_path))
+        print(f"Input {relative_path}")
+        if len(short_path) < MAX_OUTPUT_LENGTH:
+            print(f"Output {short_path}")
         else:
-            while len(short_path) >= 120:
-                print("Output {} is longer than 120 characters. Edit?".format(short_path))
+            while len(short_path) >= MAX_OUTPUT_LENGTH:
+                print(f"Output {short_path} is longer than {MAX_OUTPUT_LENGTH} characters. Edit?")
                 short_path = input(">")
 
         dest_path = os.path.join(DEST_FOLDER, short_path)
@@ -175,6 +172,6 @@ def main():
 
         convert_wav_to_16bit(FFMPEG_PATH, src_path, dest_path)
 
-    print("{} files processed.".format(len(files)))
+    print(f"{len(files)} files processed")
 
 main()
