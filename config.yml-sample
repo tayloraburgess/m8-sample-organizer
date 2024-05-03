@@ -49,6 +49,7 @@ SPLIT_PUNCTUATION:
 - " "
 - "-"
 - "+"
+- "|"
 
 # "Fill punctuation" is removed.
 FILL_PUNCTUATION:
@@ -56,10 +57,19 @@ FILL_PUNCTUATION:
 - "("
 - ")"
 - "'"
-- "#"
+- "."
+- "{"
+- "}"
+- ":"
+- ";"
+- "&"
+- "*"
+- "^"
+- "$"
+- "@"
 
 # This character is used to separate words in the final path (e.g. "Some_Pack_Name")
-JOIN_SEP: "_"
+JOIN_SEP: "-"
 
 
 ###
@@ -69,6 +79,9 @@ JOIN_SEP: "_"
 # The list of audio file types to be formatted
 FILE_TYPES:
 - wav
+- mp3
+- aif
+- aiff
 
 # The bit depth used for the processed audio file (16 bit recommended for the M8)
 TARGET_BIT_DEPTH: 16

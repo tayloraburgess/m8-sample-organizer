@@ -90,7 +90,12 @@ def shorten_path(path):
 def clean_folder(folder, unique_words):
     words = folder.split()
 
-    words = remove_dupe_words(words, unique_words)
+    words = remove_strike_words(words)
+
+    words_deduped = remove_dupe_words(words, unique_words)
+    if words_deduped:
+        # only use the deduped word list if it doesn't eliminate the path
+        words = words_deduped
     
     words = [word.lower() for word in words]
 
@@ -114,12 +119,12 @@ def clean_file(file, unique_words):
 def file_to_wav(file):
     return pathlib.Path(file).stem[:MAX_FILE_LENGTH - 4] + ".wav"
 
+def remove_strike_words(words):
+    return [word for word in words if not any(word.lower().startswith(prefix) for prefix in STRIKE_WORDS)]
+
 def remove_dupe_words(words, unique_words):
     # Remove duplicate words
     words = [word for word in words if word.lower() not in unique_words]
-
-    # Remove any strike words
-    words = [word for word in words if not any(word.lower().startswith(prefix) for prefix in STRIKE_WORDS)]
 
     # Add the remaining words to the set of unique words
     unique_words.update([word.lower() for word in words])
