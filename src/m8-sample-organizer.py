@@ -19,6 +19,8 @@ SPLIT_PUNCTUATION = config["SPLIT_PUNCTUATION"]
 FILL_PUNCTUATION = config["FILL_PUNCTUATION"]
 STRIKE_WORDS = [word.lower() for word in config["STRIKE_WORDS"]]
 JOIN_SEP = config["JOIN_SEP"]
+WORD_FORMAT = config["WORD_FORMAT"]
+DUPES_ELIMINATE_PATH = config["DUPES_ELIMINATE_PATH"]
 SKIP_EXISTING = config["SKIP_EXISTING"]
 MAX_FILE_LENGTH = config["MAX_FILE_LENGTH"]
 MAX_DIR_LENGTH = config["MAX_DIR_LENGTH"]
@@ -33,7 +35,7 @@ def get_files_by_type(folder, file_types=None):
         for file in files:
             if file_types:
                 # Get the file extension
-                file_ext = file.split(".")[-1]
+                file_ext = file.split(".")[-1].lower()
                 # If the file extension is in the list of file types, add the file path to the list
                 if file_ext not in file_types:
                     continue
@@ -93,11 +95,15 @@ def clean_folder(folder, unique_words):
     words = remove_strike_words(words)
 
     words_deduped = remove_dupe_words(words, unique_words)
-    if words_deduped:
+
+    if DUPES_ELIMINATE_PATH:
+        # always use the deduped word list
+        words = words_deduped
+    elif words_deduped:
         # only use the deduped word list if it doesn't eliminate the path
         words = words_deduped
     
-    words = [word.lower() for word in words]
+    words = [format_word(word) for word in words]
 
     return JOIN_SEP.join(words)[:MAX_DIR_LENGTH]
     
@@ -112,7 +118,7 @@ def clean_path(path, unique_words):
 def clean_file(file, unique_words):
     p = pathlib.Path(file)
 
-    words = [word.lower() for word in p.stem.split()]
+    words = [format_word(word) for word in p.stem.split()]
 
     return JOIN_SEP.join(words) + p.suffix
 
@@ -140,6 +146,15 @@ def remove_dupe_words(words, unique_words):
     unique_words.update([word.lower() for word in flipped_plurals])
 
     return words
+
+def format_word(word):
+    if WORD_FORMAT == "lower":
+        word = word.lower()
+    elif WORD_FORMAT == "upper":
+        word = word.upper()
+    elif WORD_FORMAT == "title":
+        word = word.title()
+    return word
 
 def convert_wav_to_16bit(ffmpeg_path, input_path, output_path):
     # Create the directories in the output path if they do not exist
