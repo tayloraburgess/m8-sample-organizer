@@ -73,6 +73,11 @@ FILL_PUNCTUATION:
 # This character is used to separate words in the final path (e.g. "Some_Pack_Name")
 JOIN_SEP: "-"
 
+# The case of the final path. lower, upper, title, or none (e.g. some_pack_name, SOME_PACK_NAME, Some_Pack_Name, Some_pack_name)
+WORD_FORMAT: lower
+
+# Should duplicate words be removed from the path?
+DUPES_ELIMINATE_PATH: false
 
 ###
 ### AUDIO CONFIG
